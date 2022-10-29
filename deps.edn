@@ -1,0 +1,9 @@
+{:deps  {org.clojure/clojure {:mvn/version "1.11.1"}
+         cljfx/cljfx {:mvn/version "1.7.22"}
+         cljfx/css {:mvn/version "1.1.0"}
+         io.github.cljfx/dev {:mvn/version "1.0.25"}}
+ :aliases
+ {;; Run with clj -T:build function-in-build
+  :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
+          :ns-default build}}
+ :paths ["src" "resources"]}
