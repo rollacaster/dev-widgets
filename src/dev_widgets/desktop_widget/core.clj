@@ -2,17 +2,12 @@
   (:gen-class)
   (:require
    [cljfx.api :as fx]
-   [dev-widgets.desktop-widget.app :refer [root-view]]
-   [cljfx.dev :as dev]))
+   [dev-widgets.desktop-widget.renderer :refer [renderer]]
+   [dev-widgets.desktop-widget.source-file :as source-file]))
 
-(def renderer
-  (fx/create-renderer
-   :middleware (fx/wrap-map-desc (fn [state]
-                                   {:fx/type root-view
-                                    :state state}))))
-
-(defn reload []
-  (renderer))
+(defonce *state
+  (atom {:color nil}))
 
 (defn -main [& args]
-  (fx/mount-renderer (atom {}) renderer))
+  (swap! *state assoc :color (source-file/read-value "/Users/thomas/projects/dev-widgets/src/dev_widgets/desktop_widget/app.clj" 389))
+  (fx/mount-renderer *state renderer))

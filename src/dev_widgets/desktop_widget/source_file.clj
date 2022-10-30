@@ -1,6 +1,6 @@
-(ns dev-widgets.desktop-widget.fs
+(ns dev-widgets.desktop-widget.source-file
   (:require [babashka.fs :as fs]
-            [dev-widgets.desktop-widget.core :refer [reload]]))
+            [dev-widgets.desktop-widget.renderer :refer [reload]]))
 
 (defn read-value [path pos]
   (let [start (dec pos)
@@ -27,5 +27,5 @@
     (reload)))
 
 (comment
-  (read-value "/Users/thomas/projects/dev-widgets/src/dev_widgets/desktop_widget/app.clj" 241)
-  (write-value "/Users/thomas/projects/dev-widgets/src/dev_widgets/desktop_widget/app.clj" 241 "#ffffff"))
+  (read-value "/Users/thomas/projects/dev-widgets/src/dev_widgets/desktop_widget/app.clj" 290)
+  (write-value "/Users/thomas/projects/dev-widgets/src/dev_widgets/desktop_widget/app.clj" 290 "#ff00ff"))
