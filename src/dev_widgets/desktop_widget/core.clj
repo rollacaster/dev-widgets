@@ -2,7 +2,8 @@
   (:gen-class)
   (:require
    [cljfx.api :as fx]
-   [dev-widgets.desktop-widget.app :refer [root-view]]))
+   [dev-widgets.desktop-widget.app :refer [root-view]]
+   [cljfx.dev :as dev]))
 
 (def renderer
   (fx/create-renderer
