@@ -3,9 +3,9 @@
             [cljfx.dev :as cdev]
             [com.evocomputing.colors :as colors]))
 
-(def style
+(defn style [color]
   (css/register ::style
-                {".test-color" {:-fx-fill "#FF00E4"}
+                {".test-color" {:-fx-fill color}
                  ".rainbow-gradient" {:-fx-fill "linear-gradient(to right, #ff0000 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)"}
                  ".bg-slate-400" {:-fx-fill "rgb(148,163,184)"}}))
 
@@ -24,6 +24,7 @@
 
 (defn root-view [{:keys [color color-slider-position start-pos position path]}]
   (let [[x y] start-pos
+        stylesheet (::css/url (style color))
         color (colors/create-color color)]
     {:fx/type :stage
      :always-on-top true
@@ -31,7 +32,7 @@
      :y y
      :showing true
      :scene {:fx/type :scene
-             :stylesheets [(::css/url style)]
+             :stylesheets [stylesheet]
              :root {:fx/type :v-box
                     :children [{:fx/type :pane
                                 :on-mouse-dragged {:event/type :update-color :color color :position position :path path}
