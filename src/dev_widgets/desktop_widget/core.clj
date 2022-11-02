@@ -6,8 +6,8 @@
    [com.evocomputing.colors :as colors]
    [dev-widgets.desktop-widget.app :refer [root-view]]))
 
-(defonce *state
-  (atom {:color nil}))
+(def *state
+  (atom {:color-slider-position 0}))
 
 (defn read-value [path pos]
   (let [start (dec pos)
@@ -41,29 +41,22 @@
 (defn map-event-handler [event]
   (case (:event/type event)
     :update-color
-    (fn [state]
-      (let [position (min (- 160 10) (max 0 (.getX (:fx/event event))))
-            color (:color event)
-            hue (interpolate position [0 150] [0 359])
-            new-color (colors/rgb-hexstr (colors/create-color
-                                          {:h hue
-                                           :s (colors/saturation color)
-                                           :l (colors/lightness color)}))]
-        (write-value
-         (:path event)
-         (:position event)
-         new-color)
-        (assoc state
-               :color-slider-position position
-               :color new-color)))))
+    (let [position (min (- 160 10) (max 0 (.getX (:fx/event event))))
+          color (:color event)
+          hue (interpolate position [0 150] [0 359])
+          new-color (colors/rgb-hexstr (colors/create-color
+                                        {:h hue
+                                         :s (colors/saturation color)
+                                         :l (colors/lightness color)}))]
+      (write-value
+       (:path event)
+       (:position event)
+       new-color)
+      (swap! *state assoc
+             :color-slider-position position
+             :color new-color))))
 
-(defn renderer []
-  (fx/create-renderer
-    :middleware (fx/wrap-map-desc assoc :fx/type root-view)
-    :opts {:fx.opt/map-event-handler #(swap! *state (map-event-handler %))}))
-
-(defn reload []
-  (renderer))
+(def renderer (atom nil))
 
 (defn add
   ([v] v)
@@ -81,6 +74,25 @@
            :color-slider-position 0
            :start-pos (add start-pos [10 20])))
   (fx/mount-renderer *state (renderer)))
+
+(def init
+  {:cursor-position 321
+   :path "/Users/thomas/projects/dev-widgets/src/dev_widgets/desktop_widget/app.clj"
+   :cursor-coord [2809 338]})
+
+(def renderer
+  (fx/create-renderer
+   :middleware (fx/wrap-map-desc (fn [state]
+                                   (merge {:fx/type root-view}
+                                          (let [{:keys [path cursor-position cursor-coord]} init]
+                                            {:position cursor-position
+                                             :path path
+                                             :start-pos (add cursor-coord [10 20])
+                                             :color (read-value path cursor-position)})
+                                          state)))
+   :opts {:fx.opt/map-event-handler map-event-handler}))
+
+(fx/mount-renderer *state renderer)
 
 (comment
   (-main
