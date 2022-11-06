@@ -60,5 +60,3 @@
                                 :children [(color-prop {:label "H" :value (colors/hue color)})
                                            (color-prop {:label "S" :value (colors/saturation color)})
                                            (color-prop {:label "L" :value (colors/lightness color)})]}]}}}))
-
-#_(reload)
