@@ -8,7 +8,7 @@
             [nrepl.server :as nrepl]))
 
 (defonce server (nrepl/start-server :port 7888))
-
+(defonce current-renderer (atom nil))
 (def *state
   (atom {:color-slider-position 0}))
 
@@ -23,8 +23,7 @@
            :color color
            :position position
            :path path
-           :color-slider-position (util/interpolate (colors/hue color)
-                                                    [0 359]
-                                                    [0 150])
            :start-pos (util/add start-pos [10 20])))
-  (fx/mount-renderer *state (renderer)))
+  (fx/mount-renderer *state (reset! current-renderer (renderer))))
+
+(@current-renderer)
