@@ -24,8 +24,7 @@
 
 (defn root-view [{:keys [color color-slider-position start-pos position path]}]
   (let [[x y] start-pos
-        stylesheet (::css/url (style color))
-        color (colors/create-color color)]
+        stylesheet (::css/url (style (colors/rgb-hexstr color)))]
     {:fx/type :stage
      :always-on-top true
      :x x

@@ -10,14 +10,14 @@
       (let [position (min (- 160 10) (max 0 (.getX (:fx/event event))))
             color (:color event)
             hue (util/interpolate position [0 150] [0 359])
-            new-color (colors/rgb-hexstr (colors/create-color
-                                          {:h hue
-                                           :s (colors/saturation color)
-                                           :l (colors/lightness color)}))]
+            new-color (colors/create-color
+                       {:h hue
+                        :s (colors/saturation color)
+                        :l (colors/lightness color)})]
         (fs/write-value
          (:path event)
          (:position event)
-         new-color)
+         (colors/rgb-hexstr new-color))
         (assoc state
                :color-slider-position position
                :color new-color)))))
