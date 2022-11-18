@@ -83,6 +83,6 @@
                                 :height 160
                                 :style-class "current-color"}
                                {:fx/type :h-box
-                                :children [(color-prop {:label "H" :value (colors/hue color)})
-                                           (color-prop {:label "S" :value (colors/saturation color)})
-                                           (color-prop {:label "L" :value (colors/lightness color)})]}]}}}))
+                                :children [{:fx/type color-prop :label "H" :value (colors/hue color)}
+                                           {:fx/type color-prop :label "S" :value (colors/saturation color)}
+                                           {:fx/type color-prop :label "L" :value (colors/lightness color)}]}]}}}))

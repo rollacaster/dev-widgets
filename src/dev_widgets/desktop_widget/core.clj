@@ -10,7 +10,7 @@
 (defonce server (nrepl/start-server :port 7888))
 (defonce current-renderer (atom nil))
 (def *state
-  (atom {:color-slider-position 0}))
+  (atom nil))
 
 (defn renderer []
   (fx/create-renderer
