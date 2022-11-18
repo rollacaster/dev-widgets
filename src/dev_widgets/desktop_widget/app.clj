@@ -1,13 +1,19 @@
 (ns dev-widgets.desktop-widget.app
   (:require [cljfx.css :as css]
             [cljfx.dev :as cdev]
+            [clojure.string :as str]
             [com.evocomputing.colors :as colors]
             [dev-widgets.desktop-widget.util :as util]))
 
-(defn style [color]
+(defn- linear-gradient [color-fn steps]
+  (str "linear-gradient(to right," (str/join "," (map #(colors/rgb-hexstr (colors/create-color (color-fn %))) steps))")"))
+
+(defn style [{:keys [color hue]}]
   (css/register ::style
-                {".test-color" {:-fx-fill color}
-                 ".rainbow-gradient" {:-fx-fill "linear-gradient(to right, #ff0000 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)"}
+                {".current-color" {:-fx-fill color}
+                 ".hue-gradient" {:-fx-fill (linear-gradient (fn [h] {:h h :s 100 :l 50}) (range 0 361 72))}
+                 ".saturation-gradient" {:-fx-fill (linear-gradient (fn [s] {:h hue :s s :l 50}) (range 0 101 20))}
+                 ".lightness-gradient" {:-fx-fill (linear-gradient (fn [l] {:h hue :s 100 :l l}) (range 0 101 20))}
                  ".bg-slate-400" {:-fx-fill "rgb(148,163,184)"}}))
 
 (defn color-prop [{:keys [label value]}]
@@ -23,7 +29,7 @@
      :on-text-changed prn
      :pref-width 40}]})
 
-(defn slider [{:keys [value max-value on-value-changed]}]
+(defn slider [{:keys [value max-value on-value-changed style-class]}]
   (let [slider-position (util/interpolate value [0 max-value] [0 150])]
     {:fx/type :pane
      :on-mouse-dragged on-value-changed
@@ -33,7 +39,7 @@
                  :arc-width 10
                  :width 160
                  :height 10
-                 :style-class "rainbow-gradient"}
+                 :style-class style-class}
                 {:fx/type :rectangle
                  :arc-height 10
                  :arc-width 10
@@ -44,7 +50,8 @@
 
 (defn root-view [{:keys [color start-pos position path]}]
   (let [[x y] start-pos
-        stylesheet (::css/url (style (colors/rgb-hexstr color)))]
+        stylesheet (::css/url (style {:color (colors/rgb-hexstr color)
+                                      :hue (colors/hue color)}))]
     {:fx/type :stage
      :always-on-top true
      :x x
@@ -53,19 +60,28 @@
      :scene {:fx/type :scene
              :stylesheets [stylesheet]
              :root {:fx/type :v-box
-                    :children [{:fx/type :pane
-                                :on-mouse-dragged {:event/type :update-color :color color :position position :path path}
-                                :on-mouse-clicked {:event/type :update-color :color color :position position :path path}
+                    :children [{:fx/type :v-box
                                 :children [{:fx/type slider
                                             :value (colors/hue color)
-                                            :on-value-changed {:event/type :update-color :color color :position position :path path}
-                                            :max-value 359}]}
+                                            :on-value-changed {:event/type :update-hue :color color :position position :path path}
+                                            :max-value 359
+                                            :style-class "hue-gradient"}
+                                           {:fx/type slider
+                                            :value (colors/saturation color)
+                                            :on-value-changed {:event/type :update-saturation :color color :position position :path path}
+                                            :max-value 100
+                                            :style-class "saturation-gradient"}
+                                           {:fx/type slider
+                                            :value (colors/lightness color)
+                                            :on-value-changed {:event/type :update-lightness :color color :position position :path path}
+                                            :max-value 100
+                                            :style-class "lightness-gradient"}]}
                                {:fx/type :rectangle
                                 :arc-height 10
                                 :arc-width 10
                                 :width 160
                                 :height 160
-                                :style-class "test-color"}
+                                :style-class "current-color"}
                                {:fx/type :h-box
                                 :children [(color-prop {:label "H" :value (colors/hue color)})
                                            (color-prop {:label "S" :value (colors/saturation color)})
