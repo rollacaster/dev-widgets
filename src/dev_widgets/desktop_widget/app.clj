@@ -47,7 +47,7 @@
                  :height 10
                  :style-class ["bg-slate-400"]}]}))
 
-(defn root-view [{:keys [color start-pos position path]}]
+(defn root-view [{:keys [color start-pos]}]
   (let [[x y] start-pos
         stylesheet (::css/url (style {:color (colors/rgb-hexstr color)
                                       :hue (colors/hue color)}))]
@@ -62,17 +62,17 @@
                     :children [{:fx/type :v-box
                                 :children [{:fx/type slider
                                             :value (colors/hue color)
-                                            :on-value-changed {:event/type :update-hue :color color :position position :path path}
+                                            :on-value-changed {:event/type :slider-hue :max-value 359}
                                             :max-value 359
                                             :style-class "hue-gradient"}
                                            {:fx/type slider
                                             :value (colors/saturation color)
-                                            :on-value-changed {:event/type :update-saturation :color color :position position :path path}
+                                            :on-value-changed {:event/type :slider-saturation :max-value 100}
                                             :max-value 100
                                             :style-class "saturation-gradient"}
                                            {:fx/type slider
                                             :value (colors/lightness color)
-                                            :on-value-changed {:event/type :update-lightness :color color :position position :path path}
+                                            :on-value-changed {:event/type :slider-lightness :max-value 100}
                                             :max-value 100
                                             :style-class "lightness-gradient"}]}
                                {:fx/type :rectangle
