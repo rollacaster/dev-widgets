@@ -25,5 +25,3 @@
            :path path
            :start-pos (util/add start-pos [10 20])))
   (fx/mount-renderer *state (reset! current-renderer (renderer))))
-
-(@current-renderer)
