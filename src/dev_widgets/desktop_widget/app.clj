@@ -15,8 +15,7 @@
                  ".saturation-gradient" {:-fx-fill (linear-gradient (fn [s] {:h hue :s s :l 50}) (range 0 101 20))}
                  ".lightness-gradient" {:-fx-fill (linear-gradient (fn [l] {:h hue :s 100 :l l}) (range 0 101 20))}
                  ".bg-slate-400" {:-fx-fill "rgb(148,163,184)"}}))
-
-(defn color-prop [{:keys [label value]}]
+(defn color-prop [{:keys [label value on-key-pressed]}]
   {:fx/type :v-box
    :children
    [{:fx/type :label
@@ -26,7 +25,7 @@
     {:fx/type :text-field
      :text (str value)
      :alignment :center
-     :on-text-changed prn
+     :on-key-pressed on-key-pressed
      :pref-width 40}]})
 
 (defn slider [{:keys [value max-value on-value-changed style-class]}]
@@ -83,6 +82,6 @@
                                 :height 160
                                 :style-class "current-color"}
                                {:fx/type :h-box
-                                :children [{:fx/type color-prop :label "H" :value (colors/hue color)}
-                                           {:fx/type color-prop :label "S" :value (colors/saturation color)}
-                                           {:fx/type color-prop :label "L" :value (colors/lightness color)}]}]}}}))
+                                :children [{:fx/type color-prop :label "H" :value (colors/hue color) :on-key-pressed {:event/type :key-pressed-hue}}
+                                           {:fx/type color-prop :label "S" :value (colors/saturation color) :on-key-pressed {:event/type :key-pressed-saturation}}
+                                           {:fx/type color-prop :label "L" :value (colors/lightness color) :on-key-pressed {:event/type :key-pressed-lightness}}]}]}}}))

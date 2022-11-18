@@ -20,8 +20,25 @@
        (colors/rgb-hexstr new-color))
       (assoc state :color new-color))))
 
+(defn key-pressed [event update-color]
+  (fn [{:keys [color] :as state}]
+    (let [pressed-key (.getName (.getCode (:fx/event event)))
+          ctrl? (.isControlDown (:fx/event event))]
+      (cond
+        (and ctrl? (= pressed-key "W")) (assoc state :color (update-color color 10))
+        (and ctrl? (= pressed-key "S")) (assoc state :color (update-color color -10))
+        (and ctrl? (= pressed-key "A")) (assoc state :color (update-color color -1))
+        (and ctrl? (= pressed-key "D")) (assoc state :color (update-color color 1))
+        :else state))))
+
 (defn handler [event]
   (case (:event/type event)
+    :key-pressed-hue
+    (key-pressed event colors/adjust-hue)
+    :key-pressed-saturation
+    (key-pressed event colors/saturate)
+    :key-pressed-lightness
+    (key-pressed event colors/lighten)
     :update-hue
     (update-color-component event {:range [0 359] :component :h})
     :update-saturation
