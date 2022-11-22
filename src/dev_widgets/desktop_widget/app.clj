@@ -1,10 +1,11 @@
 (ns dev-widgets.desktop-widget.app
-  (:require [cljfx.css :as css]
+  (:require [cljfx.api :as fx]
+            [cljfx.css :as css]
             [cljfx.dev :as cdev]
             [clojure.string :as str]
             [com.evocomputing.colors :as colors]
-            [dev-widgets.desktop-widget.util :as util]))
-
+            [dev-widgets.desktop-widget.util :as util]
+            [clojure.java.javadoc]))
 
 (defn- linear-gradient [color-fn steps]
   (str "linear-gradient(to right," (str/join "," (map #(colors/rgb-hexstr (colors/create-color (color-fn %))) steps))")"))
@@ -36,13 +37,12 @@
                  ".stroke-gray-800" {:-fx-stroke "rgb(31 41 55)"}
                  ".stroke-gray-900" {:-fx-stroke "rgb(17 24 39)"}}))
 
-(defn color-prop [{:keys [label value on-key-pressed]}]
-  {:fx/type :v-box
-   :children
-   [{:fx/type :text-field
-     :text (str value)
-     :on-key-pressed on-key-pressed
-     :pref-width 40}]})
+(defn transition [{:keys [transition] :as desc}]
+  {:fx/type fx/ext-let-refs
+   :refs {::transition-node (dissoc desc :transition)}
+   :desc {:fx/type fx/ext-let-refs
+          :refs {::transition (assoc transition :node {:fx/type fx/ext-get-ref :ref ::transition-node})}
+          :desc {:fx/type fx/ext-get-ref :ref ::transition-node}}})
 
 (defn slider [{:keys [value max-value on-value-changed style-class label]}]
   (let [width 130
@@ -58,12 +58,17 @@
                  :translate-y 5
                  :on-mouse-dragged on-value-changed
                  :on-mouse-clicked on-value-changed
-                 :children [{:fx/type :rectangle
-                             :arc-height 10
-                             :arc-width 10
-                             :width (+ width 10)
-                             :height 10
-                             :style-class style-class}
+                 :children [(transition
+                             {:fx/type :rectangle
+                              :arc-height 10
+                              :arc-width 10
+                              :width (+ width 10)
+                              :height 10
+                              :style-class style-class
+                              :transition {:fx/type :scale-transition,
+                                           :by-x -0.2,
+                                           :duration [1 :s],
+                                           :status :running}})
                             {:fx/type :rectangle
                              :arc-height 10
                              :arc-width 10
