@@ -3,8 +3,7 @@
             [cljfx.css :as css]
             [clojure.string :as str]
             [com.evocomputing.colors :as colors]
-            [dev-widgets.desktop-widget.util :as util]
-            [clojure.java.javadoc]))
+            [thi.ng.math.core :as math]))
 
 (defn- linear-gradient [color-fn steps]
   (str "linear-gradient(to right," (str/join "," (map #(colors/rgb-hexstr (colors/create-color (color-fn %))) steps))")"))
@@ -38,12 +37,15 @@
 
 (def width 200)
 
-(defn transition [{:keys [transition] :as desc}]
-  {:fx/type fx/ext-let-refs
-   :refs {::transition-node (dissoc desc :transition)}
-   :desc {:fx/type fx/ext-let-refs
-          :refs {::transition (assoc transition :node {:fx/type fx/ext-get-ref :ref ::transition-node})}
-          :desc {:fx/type fx/ext-get-ref :ref ::transition-node}}})
+(defn transition [{:keys [transition stack-pane/alignment stack-pane/margin] :as desc}]
+  (cond->
+      {:fx/type fx/ext-let-refs
+       :refs {::transition-node (dissoc desc :transition :stack-pane/alignment :stack-pane/margin)}
+       :desc {:fx/type fx/ext-let-refs
+              :refs {::transition (assoc transition :node {:fx/type fx/ext-get-ref :ref ::transition-node})}
+              :desc {:fx/type fx/ext-get-ref :ref ::transition-node}}}
+    alignment (assoc :stack-pane/alignment alignment)
+    margin (assoc :stack-pane/margin margin)))
 
 (defn fade-in [desc]
   (transition
@@ -53,69 +55,91 @@
                             :duration [300 :ms]
                             :status :running})))
 
-(defn slider [{:keys [value max-value on-value-changed style-class label active]}]
-  (let [width (- width 40)
-        slider-position (util/interpolate value [0 max-value] [0 width])]
-    {:fx/type :h-box
-     :children [{:fx/type :label
-                 :translate-y 11
-                 :translate-x 3
-                 :text label
-                 :pref-width 10}
-                (cond-> {:fx/type :pane
-                         :translate-x 8
-                         :pref-height 40
-                         :children (cond-> [(transition
-                                             {:fx/type :pane
-                                              :padding {:bottom 12}
-                                              :translate-y 14
-                                              :on-mouse-dragged on-value-changed
-                                              :on-mouse-clicked on-value-changed
-                                              :transition {:fx/type :scale-transition,
-                                                           :by-x -0.3,
-                                                           :duration [300 :ms],
-                                                           :status (if active :running :paused)}
-                                              :children [{:fx/type :rectangle
-                                                          :arc-height 10
-                                                          :arc-width 10
-                                                          :width (+ width 10)
-                                                          :height 10
-                                                          :style-class style-class}
-                                                         {:fx/type :rectangle
-                                                          :arc-height 10
-                                                          :arc-width 10
-                                                          :x slider-position
-                                                          :y 1
-                                                          :width 9
-                                                          :height 9
-                                                          :style-class ["bg-gray-400"]}]})]
-                                     active (conj (fade-in
-                                                   {:fx/type :label
-                                                    :style {:-fx-font-size 11}
-                                                    :translate-x 4
-                                                    :text "-1 C-a"})
-                                                  (fade-in
-                                                   {:fx/type :label
-                                                    :translate-x 4
-                                                    :translate-y 24
-                                                    :style {:-fx-font-size 11}
-                                                    :text "-10 C-s"})
-                                                  (fade-in
-                                                   {:fx/type :label
-                                                    :translate-x (- width 33)
-                                                    :style {:-fx-font-size 11}
-                                                    :text "+1 C-d"})
-                                                  (fade-in
-                                                   {:fx/type :label
-                                                    :translate-x (- width 33)
-                                                    :translate-y 24
-                                                    :style {:-fx-font-size 11}
-                                                    :text "+10 C-w"})))}
-                  active (assoc :style {:-fx-border-width 1
-                                        :-fx-border-style :solid
-                                        :-fx-border-color :blue}))]}))
+(defn slider-track [{:keys [width on-value-changed style-class active]}]
+  {:fx/type :grid-pane
+   :alignment :center
+   :on-mouse-dragged on-value-changed
+   :on-mouse-clicked on-value-changed
+   :children [(transition
+               {:fx/type :rectangle
+                :arc-height 10
+                :arc-width 10
+                :width width
+                :height 10
+                :style-class style-class
+                :transition (if active
+                              {:fx/type :scale-transition,
+                               :from-x 1
+                               :to-x 0.8
+                               :duration [300 :ms],
+                               :status :running}
+                              {:fx/type :scale-transition,
+                               :from-x 0.8
+                               :to-x 1
+                               :duration [300 :ms],
+                               :status :running})})]})
 
-(defn root-view [{:keys [color start-pos]}]
+(defn color-slider [{:keys [value max-value on-value-changed style-class active ]}]
+  (let [width (- width 25)
+        height 40
+        slider-position (math/map-interval value
+                                           [0 max-value]
+                                           [(if active (* width 0.1) 0)
+                                            (- (if active (* width 0.9) width) 10)])]
+    {:fx/type :grid-pane
+     :alignment :center
+     :pref-height height
+     :children [{:fx/type :stack-pane
+                 :pref-height height
+                 :children (cond-> [{:fx/type slider-track
+                                     :fx/key active
+                                     :width width
+                                     :stack-pane/alignment :center
+                                     :on-value-changed on-value-changed
+                                     :style-class style-class
+                                     :active active
+                                     :value value
+                                     :max-value max-value}
+                                    {:fx/type :pane
+                                     :children [{:fx/type :rectangle
+                                                 :arc-height 10
+                                                 :arc-width 10
+                                                 :x slider-position
+                                                 :y 15
+                                                 :width 10
+                                                 :height 10
+                                                 :style-class ["bg-gray-400"]}]}]
+                             active (conj
+                                     (fade-in
+                                      {:fx/type :label
+                                       :stack-pane/alignment :top-left
+                                       :padding {:left 15}
+                                       :style {:-fx-font-size 11}
+                                       :text "-1 C-a"})
+                                     (fade-in
+                                      {:fx/type :label
+                                       :stack-pane/alignment :bottom-left
+                                       :padding {:left 15}
+                                       :style {:-fx-font-size 11}
+                                       :text "-10 C-s"})
+                                     (fade-in
+                                      {:fx/type :label
+                                       :stack-pane/alignment :top-right
+                                       :padding {:right 15}
+                                       :style {:-fx-font-size 11}
+                                       :text "+1 C-d"})
+                                     (fade-in
+                                      {:fx/type :label
+                                       :stack-pane/alignment :bottom-right
+                                       :padding {:right 15}
+                                       :style {:-fx-font-size 11}
+                                       :text "+10 C-w"})))
+                 :grid-pane/column 0}
+                #_{:fx/type :label
+                 :text (subs (str value) 0 4)
+                 :grid-pane/column 1}]}))
+
+(defn root-view [{:keys [color start-pos focus]}]
   (let [[x y] start-pos
         stylesheet (::css/url (style {:color (colors/rgb-hexstr color)
                                       :hue (colors/hue color)}))]
@@ -125,49 +149,72 @@
      :y y
      :showing true
      :scene {:fx/type :scene
+             :on-key-pressed {:event/type :key-pressed-scene}
              :stylesheets [stylesheet]
              :root {:fx/type :v-box
-                    :children [{:fx/type :v-box
-                                :children [{:fx/type slider
+                    :children [{:fx/type :grid-pane
+                                :children [{:fx/type :label
+                                            :text "H"
+                                            :grid-pane/halignment :center
+                                            :grid-pane/row 0
+                                            :grid-pane/column 0}
+                                           {:fx/type color-slider
+                                            :active (= focus 0)
                                             :value (colors/hue color)
-                                            :active true
                                             :on-value-changed {:event/type :slider-hue :max-value 359}
                                             :max-value 359
                                             :style-class "hue-gradient"
-                                            :label "H"}
-                                           {:fx/type slider
+                                            :grid-pane/row 0
+                                            :grid-pane/column 1
+                                            :grid-pane/valignment :center}
+                                           {:fx/type :label
+                                            :text "S"
+                                            :alignment :center
+                                            :grid-pane/row 1
+                                            :grid-pane/column 0
+                                            :grid-pane/halignment :center}
+                                           {:fx/type color-slider
+                                            :active (= focus 1)
                                             :value (colors/saturation color)
                                             :on-value-changed {:event/type :slider-saturation :max-value 100}
                                             :max-value 100
                                             :style-class "saturation-gradient"
-                                            :label "S"}
-                                           {:fx/type slider
+                                            :grid-pane/row 1
+                                            :grid-pane/column 1}
+                                           {:fx/type :label
+                                            :text "L"
+                                            :grid-pane/halignment :center
+                                            :grid-pane/row 2
+                                            :grid-pane/column 0}
+                                           {:fx/type color-slider
+                                            :active (= focus 2)
                                             :value (colors/lightness color)
                                             :on-value-changed {:event/type :slider-lightness :max-value 100}
                                             :max-value 100
                                             :style-class "lightness-gradient"
-                                            :label "L"}]}
+                                            :grid-pane/row 2
+                                            :grid-pane/column 1}]}
                                {:fx/type :rectangle
                                 :width width
                                 :height 40
                                 :style-class "current-color"}
-                               {:fx/type :flow-pane
-                                :max-width width
-                                :vgap 10
-                                :hgap 10
-                                :padding 5
-                                :children (map
-                                           (fn [color]
-                                             {:fx/type :rectangle
-                                              :width 15
-                                              :height 15
-                                              :style-class "stroke-gray-200"
-                                              :style {:-fx-fill (-> color
-                                                                    colors/create-color
-                                                                    colors/rgba-hexstr)}})
-                                           (repeatedly
-                                            8
-                                            (fn []
-                                              {:h (rand-nth (range 0 360))
-                                               :s (rand-nth (range 90 100))
-                                               :l (rand-nth (range 40 60))})))}]}}}))
+                               #_{:fx/type :flow-pane
+                                  :max-width width
+                                  :vgap 10
+                                  :hgap 10
+                                  :padding 5
+                                  :children (map
+                                             (fn [color]
+                                               {:fx/type :rectangle
+                                                :width 15
+                                                :height 15
+                                                :style-class "stroke-gray-200"
+                                                :style {:-fx-fill (-> color
+                                                                      colors/create-color
+                                                                      colors/rgba-hexstr)}})
+                                             (repeatedly
+                                              8
+                                              (fn []
+                                                {:h (rand-nth (range 0 360))
+                                                 :s (rand-nth (range 90 100))
+                                                 :l (rand-nth (range 40 60))})))}]}}}))

@@ -20,6 +20,7 @@
 (defn start! [{:keys [position path start-pos]}]
   (let [color (colors/create-color (fs/read-value path position))]
     (swap! *state assoc
+           :focus 0
            :color color
            :position position
            :path path

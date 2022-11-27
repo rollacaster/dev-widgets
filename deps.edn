@@ -6,7 +6,8 @@
          io.github.babashka/fs {:git/url "https://github.com/babashka/fs.git"
                                 :git/sha "c43b784f52a250e4d21205f8e1ea6ec82bde038f"}
          com.evocomputing/colors {:mvn/version "1.0.6"}
-         nrepl/nrepl {:mvn/version "1.0.0"}}
+         nrepl/nrepl {:mvn/version "1.0.0"}
+         thi.ng/math {:mvn/version "0.3.1"}}
  :aliases
  {;; Run with clj -T:build function-in-build
   :build {:deps {io.github.clojure/tools.build {:git/tag "v0.8.3" :git/sha "0d20256"}}
