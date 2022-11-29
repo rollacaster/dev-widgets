@@ -2,7 +2,7 @@
   (:require [com.evocomputing.colors :as evo.colors]
             [dev-widgets.desktop-widget.colors :as colors]
             [dev-widgets.desktop-widget.fs :as fs]
-            [dev-widgets.desktop-widget.util :as util]))
+            [thi.ng.math.core :as math]))
 
 (defn- update-color [{:keys [path position] :as state} color]
   (fs/write-value path position (evo.colors/rgb-hexstr color))
@@ -21,7 +21,7 @@
 (defn- slider [event update-color-component]
   (fn [{:keys [color] :as state}]
     (let [slider-position (min (- 160 10) (max 0 (.getX (:fx/event event))))
-          value (util/interpolate slider-position [0 150] [0 (:max-value event)])
+          value (math/map-interval slider-position [0 150] [0 (:max-value event)])
           new-color (update-color-component color value)]
       (update-color state new-color))))
 
