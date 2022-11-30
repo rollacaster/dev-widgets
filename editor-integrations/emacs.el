@@ -15,4 +15,8 @@
                              (number-to-string (first position))
                              " "
                              (number-to-string (rest position))
-                             "\]'")))))
+                             "\]'")))
+    (let ((pid (number-to-string (apply #'min (mapcar #'string-to-number (split-string (string-trim (shell-command-to-string "ps aux | grep cljfx | awk '/java/{print $2}'")) "\n"))))))
+      (shell-command (concat "osascript -e 'tell application \"System Events\"
+    set frontmost of every process whose unix id is " pid " to true
+end tell'")))))
