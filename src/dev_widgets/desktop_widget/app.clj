@@ -1,6 +1,7 @@
 (ns dev-widgets.desktop-widget.app
   (:require [cljfx.api :as fx]
             [cljfx.css :as css]
+            [clojure.java.shell :as sh]
             [clojure.string :as str]
             [com.evocomputing.colors :as colors]
             [dev-widgets.desktop-widget.util :as util]
@@ -156,6 +157,7 @@
     {:fx/type :stage
      :style :transparent
      :always-on-top true
+     :on-close-request (fn [_] (sh/sh "open" "-a" "Emacs"))
      :x x
      :y y
      :showing true
