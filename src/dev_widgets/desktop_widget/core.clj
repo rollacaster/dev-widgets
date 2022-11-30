@@ -6,8 +6,8 @@
             [dev-widgets.desktop-widget.fs :as fs]
             [dev-widgets.desktop-widget.util :as util]
             [nrepl.server :as nrepl]))
-
-(defonce server (nrepl/start-server :port 7888))
+(prn "Dev widgets are ready")
+(defonce server (nrepl/start-server :port 7899))
 (defonce current-renderer (atom nil))
 (def *state
   (atom nil))
