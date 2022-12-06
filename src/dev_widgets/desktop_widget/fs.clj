@@ -1,21 +1,18 @@
 (ns dev-widgets.desktop-widget.fs
   (:require [babashka.fs :as fs]))
 
-(defn read-value [path pos]
-  (let [start (dec pos)
-        end (+ start 7)
-        path  path
-        bytes (vec (fs/read-all-bytes path))]
-    (->> (subvec bytes start end)
-         (map char)
-         (apply str))))
+(defn read-value [path [row col]]
+  (apply str
+         (subvec (vec (nth (fs/read-all-lines path) (dec row)))
+                 col
+                 (+ col 7))))
 
-(defn write-value [path pos value]
-  (let [start (dec pos)
-        end (+ start 7)
-        bytes (vec (fs/read-all-bytes path))]
-    (->> (reduce into [(subvec bytes 0 start)
-                       (mapv int value)
-                       (subvec bytes end)])
-         byte-array
-         (fs/write-bytes path))))
+(defn write-value [path [row col] value]
+  (fs/write-lines
+   path
+   (-> (fs/read-all-lines path)
+       (update (dec row) (fn [line]
+                           (str
+                            (subs line 0 col)
+                            value
+                            (subs line (+ col 7))))))))

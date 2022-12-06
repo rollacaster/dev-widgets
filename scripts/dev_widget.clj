@@ -3,7 +3,7 @@
             [clojure.tools.cli :as cli]))
 
 (def cli-options [["-pos" "--position POSITION" "Position"
-                   :parse-fn #(Integer/parseInt %)]
+                   :parse-fn #(read-string %)]
                   ["-s" "--start-pos START-POSITION" "Start Position"
                    :parse-fn #(read-string %)]
                   ["-p" "--path PATH" "Path" ]])

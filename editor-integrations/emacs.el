@@ -8,9 +8,12 @@
                              "--path '"
                              buffer-file-name
                              "'"
-                             " --position "
-                             (number-to-string (point))
-                             " --start-pos '"
+                             " --position '"
+                             "\["
+                             (number-to-string (line-number-at-pos))
+                             " "
+                             (number-to-string (current-column))
+                             "\]' --start-pos '"
                              "\["
                              (number-to-string (first position))
                              " "
