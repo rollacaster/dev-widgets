@@ -1,12 +1,6 @@
 (ns dev-widgets.desktop-widget.fs
   (:require [babashka.fs :as fs]))
 
-(defn read-value [path [row col]]
-  (apply str
-         (subvec (vec (nth (fs/read-all-lines path) (dec row)))
-                 col
-                 (+ col 7))))
-
 (defn write-value [path [row col] value]
   (fs/write-lines
    path

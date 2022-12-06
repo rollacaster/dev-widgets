@@ -1,11 +1,11 @@
 (ns dev-widgets.desktop-widget.core
   (:require [cljfx.api :as fx]
-            [com.evocomputing.colors :as colors]
             [dev-widgets.desktop-widget.app :refer [root-view]]
+            [dev-widgets.desktop-widget.context :as context]
             [dev-widgets.desktop-widget.events :as events]
-            [dev-widgets.desktop-widget.fs :as fs]
             [dev-widgets.desktop-widget.util :as util]
             [nrepl.server :as nrepl]))
+
 (prn "Dev widgets are ready")
 (defonce server (nrepl/start-server :port 7899))
 (defonce current-renderer (atom nil))
@@ -18,10 +18,10 @@
    :opts {:fx.opt/map-event-handler #(swap! *state (events/handler %))}))
 
 (defn start! [{:keys [position path start-pos]}]
-  (let [color (colors/create-color (fs/read-value path position))]
+  (let [{:keys [value position]} (context/->color position path)]
     (swap! *state assoc
            :focus 0
-           :color color
+           :color value
            :position position
            :path path
            :start-pos (util/add start-pos [10 20])))
