@@ -60,15 +60,15 @@
         (->> (wrapping-forms position path)
              (keep find-context)
              last)]
-    {:type [:color color-format]
+    {:context-type [:color color-format]
      :position [x1 y1]
      :length (- y2 y1)
      :value color
      :path path}))
 
-(defn write [{:keys [type]} value]
+(defn write [{:keys [context-type]} value]
   (str "\""
-       (case type
+       (case context-type
          [:color :hex] (colors/rgb-hexstr value)
          [:color :rgb] (str "rgb(" (colors/red value) ", " (colors/green value) ", " (colors/blue value) ")")
          [:color :rgba] (str "rgba(" (colors/red value) ", " (colors/green value) ", " (colors/blue value) ", " (util/one-decimal (double (/ (colors/alpha value) 255))) ")"))
