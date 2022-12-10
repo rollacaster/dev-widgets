@@ -63,7 +63,8 @@
     {:type [:color color-format]
      :position [x1 y1]
      :length (- y2 y1)
-     :value color}))
+     :value color
+     :path path}))
 
 (defn write [{:keys [type]} value]
   (str "\""

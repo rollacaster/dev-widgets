@@ -1,7 +1,7 @@
 (ns dev-widgets.desktop-widget.fs
   (:require [babashka.fs :as fs]))
 
-(defn write-value [path {:keys [position length]} value]
+(defn write-value [{:keys [path position length]} value]
   (let [[row col] position]
     (fs/write-lines
      path

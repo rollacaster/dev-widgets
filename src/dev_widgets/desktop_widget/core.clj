@@ -21,7 +21,5 @@
   (swap! *state assoc
          :focus 0
          :context (context/detect position path)
-         :position position
-         :path path
          :start-pos (util/add start-pos [10 20]))
   (fx/mount-renderer *state (reset! current-renderer (renderer))))

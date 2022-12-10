@@ -5,9 +5,9 @@
             [dev-widgets.desktop-widget.fs :as fs]
             [thi.ng.math.core :as math]))
 
-(defn- update-color [{:keys [context path] :as state} color]
+(defn- update-color [{:keys [context] :as state} color]
   (let [new-value (context/write context color)]
-    (fs/write-value path context new-value)
+    (fs/write-value context new-value)
     (-> state
         (assoc-in [:context :value] color)
         (assoc-in [:context :length] (count new-value)))))
