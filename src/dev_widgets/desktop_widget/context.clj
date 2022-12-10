@@ -56,13 +56,12 @@
     :else nil))
 
 (defn detect [position path]
-  (let [[[[x1 y1] [_ y2]] color-format color]
+  (let [[position-span color-format color]
         (->> (wrapping-forms position path)
              (keep find-context)
              last)]
     {:context-type [:color color-format]
-     :position [x1 y1]
-     :length (- y2 y1)
+     :position-span position-span
      :value color
      :path path}))
 

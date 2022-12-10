@@ -3,14 +3,21 @@
             [dev-widgets.desktop-widget.colors :as colors]
             [dev-widgets.desktop-widget.context :as context]
             [dev-widgets.desktop-widget.fs :as fs]
+            [dev-widgets.desktop-widget.position-span :as position-span]
             [thi.ng.math.core :as math]))
 
 (defn- update-color [{:keys [context] :as state} color]
-  (let [new-value (context/write context color)]
-    (fs/write-value context new-value)
+  (let [{:keys [path position-span]} context
+        new-value (context/write context color)]
+    (fs/write-value
+     {:from (position-span/col-start position-span)
+      :to (+ (position-span/col-start position-span) (position-span/length position-span))
+      :line (position-span/row-start position-span)
+      :value new-value
+      :path path})
     (-> state
         (assoc-in [:context :value] color)
-        (assoc-in [:context :length] (count new-value)))))
+        (update-in [:context :position-span] position-span/update-length (count new-value)))))
 
 (defn- update-color-component [{:keys [focus context] :as state} value]
   (let [color-component (case focus 0 :hue 1 :saturate 2 :lighten)
