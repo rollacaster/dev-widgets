@@ -150,10 +150,72 @@
                                        :position :bottom-right})))
                  :grid-pane/column 0}]}))
 
-(defn root-view [{:keys [color start-pos focus]}]
-  (let [[x y] start-pos
-        stylesheet (::css/url (style {:color (colors/rgb-hexstr color)
-                                      :hue (colors/hue color)}))]
+(defn color-picker [{:keys [color focus]}]
+  [{:fx/type :label
+    :text "H"
+    :grid-pane/halignment :center
+    :grid-pane/row 0
+    :grid-pane/column 0}
+   {:fx/type color-slider
+    :color color
+    :active (= focus 0)
+    :value (colors/hue color)
+    :on-value-changed {:event/type :slider-hue :max-value 359}
+    :max-value 359
+    :style-class "hue-gradient"
+    :grid-pane/row 0
+    :grid-pane/column 1
+    :grid-pane/valignment :center}
+   {:fx/type :label
+    :text (util/two-decimals (colors/hue color))
+    :grid-pane/row 0
+    :grid-pane/halignment :center
+    :grid-pane/column 2}
+   {:fx/type :label
+    :text "S"
+    :alignment :center
+    :grid-pane/row 1
+    :grid-pane/column 0
+    :grid-pane/halignment :center}
+   {:fx/type color-slider
+    :color color
+    :active (= focus 1)
+    :value (colors/saturation color)
+    :on-value-changed {:event/type :slider-saturation :max-value 100}
+    :max-value 100
+    :style-class "saturation-gradient"
+    :grid-pane/row 1
+    :grid-pane/column 1}
+   {:fx/type :label
+    :text (util/two-decimals (colors/saturation color))
+    :grid-pane/row 1
+    :grid-pane/halignment :center
+    :grid-pane/column 2}
+   {:fx/type :label
+    :text "L"
+    :grid-pane/halignment :center
+    :grid-pane/row 2
+    :grid-pane/column 0}
+   {:fx/type color-slider
+    :color color
+    :active (= focus 2)
+    :value (colors/lightness color)
+    :on-value-changed {:event/type :slider-lightness :max-value 100}
+    :max-value 100
+    :style-class "lightness-gradient"
+    :grid-pane/row 2
+    :grid-pane/column 1}
+   {:fx/type :label
+    :text (util/two-decimals (colors/lightness color))
+    :grid-pane/row 2
+    :grid-pane/halignment :center
+    :grid-pane/column 2}])
+
+(defn root-view [{:keys [context start-pos focus]}]
+  (let [{:keys [value]} context
+        [x y] start-pos
+        stylesheet (::css/url (style {:color (colors/rgb-hexstr value)
+                                      :hue (colors/hue value)}))]
     {:fx/type :stage
      :style :transparent
      :always-on-top true
@@ -177,62 +239,4 @@
                                                       :percent-width 0.75}
                                                      {:fx/type :column-constraints
                                                       :percent-width 0.2}]
-                                :children [{:fx/type :label
-                                            :text "H"
-                                            :grid-pane/halignment :center
-                                            :grid-pane/row 0
-                                            :grid-pane/column 0}
-                                           {:fx/type color-slider
-                                            :color color
-                                            :active (= focus 0)
-                                            :value (colors/hue color)
-                                            :on-value-changed {:event/type :slider-hue :max-value 359}
-                                            :max-value 359
-                                            :style-class "hue-gradient"
-                                            :grid-pane/row 0
-                                            :grid-pane/column 1
-                                            :grid-pane/valignment :center}
-                                           {:fx/type :label
-                                            :text (util/two-decimals (colors/hue color))
-                                            :grid-pane/row 0
-                                            :grid-pane/halignment :center
-                                            :grid-pane/column 2}
-                                           {:fx/type :label
-                                            :text "S"
-                                            :alignment :center
-                                            :grid-pane/row 1
-                                            :grid-pane/column 0
-                                            :grid-pane/halignment :center}
-                                           {:fx/type color-slider
-                                            :color color
-                                            :active (= focus 1)
-                                            :value (colors/saturation color)
-                                            :on-value-changed {:event/type :slider-saturation :max-value 100}
-                                            :max-value 100
-                                            :style-class "saturation-gradient"
-                                            :grid-pane/row 1
-                                            :grid-pane/column 1}
-                                           {:fx/type :label
-                                            :text (util/two-decimals (colors/saturation color))
-                                            :grid-pane/row 1
-                                            :grid-pane/halignment :center
-                                            :grid-pane/column 2}
-                                           {:fx/type :label
-                                            :text "L"
-                                            :grid-pane/halignment :center
-                                            :grid-pane/row 2
-                                            :grid-pane/column 0}
-                                           {:fx/type color-slider
-                                            :color color
-                                            :active (= focus 2)
-                                            :value (colors/lightness color)
-                                            :on-value-changed {:event/type :slider-lightness :max-value 100}
-                                            :max-value 100
-                                            :style-class "lightness-gradient"
-                                            :grid-pane/row 2
-                                            :grid-pane/column 1}
-                                           {:fx/type :label
-                                            :text (util/two-decimals (colors/lightness color))
-                                            :grid-pane/row 2
-                                            :grid-pane/halignment :center
-                                            :grid-pane/column 2}]}]}}}))
+                                :children (color-picker {:color value :focus focus})}]}}}))

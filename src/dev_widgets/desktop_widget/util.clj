@@ -7,5 +7,11 @@
   ([v1 v2 & vs]
    (apply add (add v1 v2) vs)))
 
+(defn- format-decimals-nubers [decimal-count number]
+  (java.lang.String/format java.util.Locale/US (str "%." decimal-count "f") (to-array [number])))
+
 (defn two-decimals [number]
-  (java.lang.String/format java.util.Locale/US "%.2f" (to-array [number])))
+  (format-decimals-nubers 2 number))
+
+(defn one-decimal [number]
+  (format-decimals-nubers 1 number))

@@ -1,28 +1,32 @@
 (ns dev-widgets.desktop-widget.events
   (:require [com.evocomputing.colors :as evo.colors]
             [dev-widgets.desktop-widget.colors :as colors]
+            [dev-widgets.desktop-widget.context :as context]
             [dev-widgets.desktop-widget.fs :as fs]
             [thi.ng.math.core :as math]))
 
-(defn- update-color [{:keys [path position] :as state} color]
-  (fs/write-value path position (evo.colors/rgb-hexstr color))
-  (assoc state :color color))
+(defn- update-color [{:keys [context path] :as state} color]
+  (let [new-value (context/write context color)]
+    (fs/write-value path context new-value)
+    (-> state
+        (assoc-in [:context :value] color)
+        (assoc-in [:context :length] (count new-value)))))
 
-(defn- update-color-component [{:keys [focus color] :as state} value]
+(defn- update-color-component [{:keys [focus context] :as state} value]
   (let [color-component (case focus 0 :hue 1 :saturate 2 :lighten)
         new-color ((case color-component
                      :hue evo.colors/adjust-hue
                      :saturate evo.colors/saturate
                      :lighten evo.colors/lighten)
-                   color
+                   (:value context)
                    value)]
     (update-color state new-color)))
 
 (defn- slider [event update-color-component]
-  (fn [{:keys [color] :as state}]
+  (fn [{:keys [context] :as state}]
     (let [slider-position (min (- 160 10) (max 0 (.getX (:fx/event event))))
           value (math/map-interval slider-position [0 150] [0 (:max-value event)])
-          new-color (update-color-component color value)]
+          new-color (update-color-component (:value context) value)]
       (update-color state new-color))))
 
 (defn- key-pressed [event]
